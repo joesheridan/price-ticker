@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1 WebSocket Client
+  p Welcome to the websocket client
+  p send the following to the web socket echo server:
+  input(type="text", id="send-text")
+  button(id="send-btn") Send Msg
+  #output
