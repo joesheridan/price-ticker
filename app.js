@@ -8,7 +8,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
-var users = require('./routes/user');
 var truefx = require('./services/truefx');
 
 var app = express();
@@ -33,14 +32,25 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-app.use('/users', users);
 
-app.ws('/echo', function(ws, req) {
-  ws.on('message', function(msg) {
-    truefx.on('data', (data) => {
-      ws.send(data);
-    });
-  });
+const callback = (ws,data) => {
+  if (ws.readyState === 1) {
+    ws.send(data);
+  }
+};
+
+app.ws('/tickdata', function(ws, req) {
+
+  truefx.on('data', callback.bind(this, ws));
+
+  ws.on('close', function() {
+    console.log('websocket close closed..')
+    truefx.removeListener('data',callback.bind(this, ws))
+  })
+
+  ws.on('error', function(error) {
+    console.log('websocket error..',error)
+  })
 });
 
 /// catch 404 and forward to error handler

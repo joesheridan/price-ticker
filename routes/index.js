@@ -7,4 +7,8 @@ router.get('/ws-client', function(req, res) {
   res.render('ws-client', { title: 'Express' });
 });
 
+router.get('/', function(req, res) {
+  res.render('index', { title: 'Express' });
+});
+
 module.exports = router;
