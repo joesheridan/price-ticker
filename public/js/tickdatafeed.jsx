@@ -11,10 +11,11 @@ class TickDataFeed extends Component {
   constructor(props) {
     super(props);
     this.wsUri = "ws://localhost:3000/tickdata";
+    let initialColumn = _.concat(['EUR/USD'], _.fill(Array(20), 1.05435))
     const c3data = {
       columns: [
-        ['EUR/USD'],
-        ['GBP/USD']
+        initialColumn
+        //['GBP/USD']
       ]
     }
     this.state = { status: 'closed', data: [], c3data};
@@ -39,8 +40,8 @@ class TickDataFeed extends Component {
 
   onMessage(evt) {
     let c3data = _.cloneDeep(this.state.c3data);
-    c3data.columns[0].push(common.getLatestData("EUR/USD",evt.data))
-    c3data.columns[1].push(common.getLatestData("GBP/USD",evt.data))
+    c3data.columns[0] = common.addColumnData(c3data.columns[0], common.getLatestData("EUR/USD",evt.data))
+    //c3data.columns[1].push(common.getLatestData("GBP/USD",evt.data))
     this.setState({ c3data })
   }
 

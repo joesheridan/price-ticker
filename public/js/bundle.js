@@ -36232,6 +36232,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.getLatestData = getLatestData;
+exports.addColumnData = addColumnData;
 
 var _lodash = __webpack_require__(58);
 
@@ -36242,7 +36243,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function getLatestData(currencyStr, data) {
   var parsedData = parseTickData(data);
   var idx = getCurrencyIndex(currencyStr, parsedData);
-  return parsedData[idx][8];
+  return String(parsedData[idx][2]) + String(parsedData[idx][3]);
 }
 
 function getCurrencyIndex(currencyStr, data) {
@@ -36256,6 +36257,14 @@ function parseTickData(data) {
   return _lodash2.default.map(lines, function (line) {
     return line.split(',');
   });
+}
+
+function addColumnData(column, value) {
+  var tail = _lodash2.default.chain(column).tail().drop().value();
+
+  tail.unshift(column[0]);
+  tail.push(value);
+  return tail;
 }
 
 /***/ }),
@@ -36309,8 +36318,11 @@ var TickDataFeed = function (_Component) {
     var _this = _possibleConstructorReturn(this, (TickDataFeed.__proto__ || Object.getPrototypeOf(TickDataFeed)).call(this, props));
 
     _this.wsUri = "ws://localhost:3000/tickdata";
+    var initialColumn = _lodash2.default.concat(['EUR/USD'], _lodash2.default.fill(Array(20), 1.05435));
     var c3data = {
-      columns: [['EUR/USD'], ['GBP/USD']]
+      columns: [initialColumn
+      //['GBP/USD']
+      ]
     };
     _this.state = { status: 'closed', data: [], c3data: c3data };
     return _this;
@@ -36340,8 +36352,8 @@ var TickDataFeed = function (_Component) {
     key: 'onMessage',
     value: function onMessage(evt) {
       var c3data = _lodash2.default.cloneDeep(this.state.c3data);
-      c3data.columns[0].push(common.getLatestData("EUR/USD", evt.data));
-      c3data.columns[1].push(common.getLatestData("GBP/USD", evt.data));
+      c3data.columns[0] = common.addColumnData(c3data.columns[0], common.getLatestData("EUR/USD", evt.data));
+      //c3data.columns[1].push(common.getLatestData("GBP/USD",evt.data))
       this.setState({ c3data: c3data });
     }
   }, {
